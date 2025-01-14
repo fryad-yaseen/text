@@ -2,6 +2,8 @@
 
 My basic template with TanStack Router and a few other libraries.
 
+![image](https://github.com/user-attachments/assets/3f18007c-c195-4663-8b79-c82b6bde69da)
+
 ## Features
 
 - ⚡️ [Vite](https://vitejs.dev/) - Lightning fast build tool
