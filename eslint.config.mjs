@@ -23,13 +23,19 @@ export default antfu({
     "antfu/no-top-level-await": ["off"],
     "node/prefer-global/process": ["off"],
     "node/no-process-env": ["error"],
-    "perfectionist/sort-imports": ["error", {
-      tsconfigRootDir: ".",
-    }],
-    "unicorn/filename-case": ["error", {
-      case: "kebabCase",
-      ignore: ["README.md"],
-    }],
+    "perfectionist/sort-imports": [
+      "error",
+      {
+        tsconfigRootDir: ".",
+      },
+    ],
+    "unicorn/filename-case": [
+      "error",
+      {
+        case: "kebabCase",
+        ignore: ["README.md"],
+      },
+    ],
     "react-compiler/react-compiler": "error",
     "react-refresh/only-export-components": "off",
     "react/no-prop-types": "off",
@@ -37,24 +43,32 @@ export default antfu({
     "react-hooks/rules-of-hooks": "error",
     "antfu/top-level-function": "off",
     "@tanstack/query/exhaustive-deps": "error",
-    "no-unused-vars": ["warn", {
-      args: "after-used",
-      ignoreRestSiblings: false,
-      argsIgnorePattern: "^_.*?$",
-    }],
-    "style/padding-line-between-statements": ["error", {
-      blankLine: "always",
-      prev: "*",
-      next: "return",
-    }, {
+    "no-unused-vars": [
+      "warn",
+      {
+        args: "after-used",
+        ignoreRestSiblings: false,
+        argsIgnorePattern: "^_.*?$",
+      },
+    ],
+    "style/padding-line-between-statements": [
+      "error",
+      {
+        blankLine: "always",
+        prev: "*",
+        next: "return",
+      },
+      {
         blankLine: "always",
         prev: ["const", "let", "var"],
         next: "*",
-      }, {
+      },
+      {
         blankLine: "any",
         prev: ["const", "let", "var"],
         next: ["const", "let", "var"],
-      }],
+      },
+    ],
   },
   languageOptions: {
     globals: {

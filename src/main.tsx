@@ -6,10 +6,16 @@ import App from "./app";
 import queryClient from "./lib/query-client";
 import "./styles/globals.css";
 
-createRoot(document.getElementById("root")!).render(
-  <StrictMode>
-    <QueryClientProvider client={queryClient}>
-      <App />
-    </QueryClientProvider>
-  </StrictMode>,
-);
+const rootElement = document.getElementById("app");
+
+if (rootElement && !rootElement.innerHTML) {
+  const root = createRoot(rootElement);
+
+  root.render(
+    <StrictMode>
+      <QueryClientProvider client={queryClient}>
+        <App />
+      </QueryClientProvider>
+    </StrictMode>,
+  );
+}
