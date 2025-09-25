@@ -9,16 +9,25 @@ let loadPromise: Promise<void> | null = null;
 export async function loadQuranData() {
   if (loadPromise) return loadPromise;
   loadPromise = (async () => {
-    const [qpcRes, uthRes, segRes, surahRes] = await Promise.all([
-      fetch("/text/qpc-v1-glyph-codes-wbw.json"),
-      fetch("/text/uthmani.json"),
-      fetch("/audio/segments.json"),
-      fetch("/audio/surah.json"),
-    ]);
-    qpcGlyphs = (await qpcRes.json()) as any;
-    uthmaniWords = (await uthRes.json()) as any;
-    segmentsByAyah = (await segRes.json()) as any;
-    surahAudio = (await surahRes.json()) as any;
+    try {
+      const [qpcRes, uthRes, segRes, surahRes] = await Promise.all([
+        fetch("/text/qpc-v1-glyph-codes-wbw.json").catch(() => null),
+        fetch("/text/uthmani.json").catch(() => null),
+        fetch("/audio/segments.json").catch(() => null),
+        fetch("/audio/surah.json").catch(() => null),
+      ]);
+      qpcGlyphs = qpcRes && qpcRes.ok ? ((await qpcRes.json()) as any) : {};
+      uthmaniWords = uthRes && uthRes.ok ? ((await uthRes.json()) as any) : {};
+      segmentsByAyah = segRes && segRes.ok ? ((await segRes.json()) as any) : {};
+      surahAudio = surahRes && surahRes.ok ? ((await surahRes.json()) as any) : {};
+    } catch (e) {
+      // Fallback to empty objects on any unexpected failure
+      qpcGlyphs = qpcGlyphs || {};
+      uthmaniWords = uthmaniWords || {};
+      segmentsByAyah = segmentsByAyah || {};
+      surahAudio = surahAudio || {};
+      // Do not rethrow; we want UI to proceed.
+    }
   })();
   return loadPromise;
 }

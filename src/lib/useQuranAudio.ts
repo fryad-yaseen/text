@@ -28,6 +28,9 @@ export default function useQuranAudio(surah: number) {
     if (!audioRef.current) {
       audioRef.current = new Audio();
       audioRef.current.preload = "auto";
+      try {
+        audioRef.current.crossOrigin = "anonymous";
+      } catch {}
     }
     const audio = audioRef.current;
     if (meta?.audio_url) {
@@ -44,6 +47,10 @@ export default function useQuranAudio(surah: number) {
     async (ayah: number) => {
       const audio = audioRef.current;
       if (!audio || !meta) return;
+      if (!audio.src) {
+        audio.src = meta.audio_url;
+        setDurationSec(meta.duration);
+      }
       const segs = getAyahSegments(surah, ayah);
       if (!segs) return;
       setActive({ surah, ayah });
@@ -73,6 +80,10 @@ export default function useQuranAudio(surah: number) {
     async (ayah: number, wordIndex: number) => {
       const audio = audioRef.current;
       if (!audio || !meta) return;
+      if (!audio.src) {
+        audio.src = meta.audio_url;
+        setDurationSec(meta.duration);
+      }
       const segs = getAyahSegments(surah, ayah);
       if (!segs) return;
       const found = segs.segments.find((s) => s[0] === wordIndex);
@@ -92,6 +103,10 @@ export default function useQuranAudio(surah: number) {
     async (startAyah?: number) => {
       const audio = audioRef.current;
       if (!audio || !meta) return;
+      if (!audio.src) {
+        audio.src = meta.audio_url;
+        setDurationSec(meta.duration);
+      }
       const firstAyah = startAyah ?? ayahList[0];
       const segs = firstAyah ? getAyahSegments(surah, firstAyah) : null;
       if (segs) {
@@ -172,6 +187,9 @@ export default function useQuranAudio(surah: number) {
         });
       }
     };
+    const onLoadedMeta = () => {
+      setDurationSec(audio.duration || 0);
+    };
     const onEnded = () => {
       setActive(null);
       setCurrentWordIndex(null);
@@ -180,11 +198,13 @@ export default function useQuranAudio(surah: number) {
     const onPlay = () => setIsPlaying(true);
     const onPause = () => setIsPlaying(false);
     audio.addEventListener("timeupdate", onTime);
+    audio.addEventListener("loadedmetadata", onLoadedMeta);
     audio.addEventListener("ended", onEnded);
     audio.addEventListener("play", onPlay);
     audio.addEventListener("pause", onPause);
     return () => {
       audio.removeEventListener("timeupdate", onTime);
+      audio.removeEventListener("loadedmetadata", onLoadedMeta);
       audio.removeEventListener("ended", onEnded);
       audio.removeEventListener("play", onPlay);
       audio.removeEventListener("pause", onPause);

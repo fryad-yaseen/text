@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 
-// Public path where fonts are hosted after build
-const PUBLIC_FONT_DIR = "/text/QPC V1 Font.woff2";
+// Public path where fonts are hosted after build (space encoded)
+const PUBLIC_FONT_DIR = "/text/QPC%20V1%20Font.woff2";
 // Total number of font pages available (p1.woff2 ... p604.woff2)
 const FONT_PAGES = 604;
 
@@ -21,7 +21,7 @@ export default function QPCFontLoader() {
       const family = `QPCV1_${i}`;
       families.push(`\"${family}\"`);
       const url = `${PUBLIC_FONT_DIR}/p${i}.woff2`;
-      css += `@font-face{font-family:${family};src:url(${url}) format('woff2');font-display:swap;}`;
+      css += `@font-face{font-family:${family};src:url('${url}') format('woff2');font-display:swap;}`;
     }
     css += `.font-qpc{font-family:${families.join(",")}, system-ui, sans-serif;}`;
     injectStyle(css);

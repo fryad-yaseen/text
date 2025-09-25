@@ -17,9 +17,13 @@ function QuranPage() {
 
   useEffect(() => {
     let mounted = true;
-    loadQuranData().then(() => {
-      if (mounted) setReady(true);
-    });
+    loadQuranData()
+      .then(() => {
+        if (mounted) setReady(true);
+      })
+      .catch(() => {
+        if (mounted) setReady(true);
+      });
     return () => {
       mounted = false;
     };
@@ -51,8 +55,6 @@ function QuranPage() {
       </div>
 
       {/* No pagination controls; show all ayahs of Surah 1 */}
-
-      <audio ref={audioRef} hidden />
 
       {ready && ayahNumbers.length > 0 ? (
         <div className="divide-y">

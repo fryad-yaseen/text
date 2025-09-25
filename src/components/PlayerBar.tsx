@@ -33,7 +33,6 @@ export default function PlayerBar({ surah, controller }: { surah: number; contro
   return (
     <div className="fixed bottom-0 left-0 right-0 bg-card/95 backdrop-blur border-t z-50">
       <div className="max-w-5xl mx-auto p-2 flex items-center gap-3">
-        <audio ref={audioRef} hidden />
         {isPlaying ? (
           <Button size="sm" variant="secondary" onClick={pause} title="Pause">
             <Pause className="h-5 w-5" />
