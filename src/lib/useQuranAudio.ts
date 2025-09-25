@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   getAyahSegments,
   getSurahAudioMeta,
@@ -20,8 +20,8 @@ export default function useQuranAudio(surah: number) {
   const [timeSec, setTimeSec] = useState(0);
   const [durationSec, setDurationSec] = useState(0);
 
-  const meta = useMemo(() => getSurahAudioMeta(surah), [surah]);
-  const ayahList = useMemo(() => listAyahsInSurah(surah), [surah]);
+  const meta = getSurahAudioMeta(surah);
+  const ayahList = listAyahsInSurah(surah);
 
   // Init audio element
   useEffect(() => {

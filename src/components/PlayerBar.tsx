@@ -1,7 +1,6 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Pause, Play } from "lucide-react";
-import surahAudio from "@/assets/audio/surah.json";
 
 export type PlayerController = {
   audioRef: React.RefObject<HTMLAudioElement | null>;
@@ -22,8 +21,6 @@ export default function PlayerBar({ surah, controller }: { surah: number; contro
   useEffect(() => {
     if (!dragging) setInternal(timeSec);
   }, [timeSec, dragging]);
-
-  const meta = useMemo(() => (surahAudio as any)[String(surah)], [surah]);
 
   const onChange = (v: number) => {
     setInternal(v);
@@ -51,7 +48,7 @@ export default function PlayerBar({ surah, controller }: { surah: number; contro
             type="range"
             className="w-full"
             min={0}
-            max={durationSec || meta?.duration || 0}
+            max={durationSec || 0}
             value={internal}
             onChange={(e) => {
               setDragging(true);
@@ -65,7 +62,7 @@ export default function PlayerBar({ surah, controller }: { surah: number; contro
           />
           <div className="flex justify-between text-xs text-muted-foreground">
             <span>{format(timeSec)}</span>
-            <span>{format(durationSec || meta?.duration || 0)}</span>
+            <span>{format(durationSec || 0)}</span>
           </div>
         </div>
         <div className="text-sm">Surah {surah}</div>

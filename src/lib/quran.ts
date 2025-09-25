@@ -1,7 +1,31 @@
-import qpcGlyphs from "@/assets/text/qpc-v1-glyph-codes-wbw.json";
-import uthmaniWords from "@/assets/text/uthmani.json";
-import segmentsByAyah from "@/assets/audio/segments.json";
-import surahAudio from "@/assets/audio/surah.json";
+// Assets now load from public/ at runtime
+let qpcGlyphs: Record<string, { text: string }> | null = null;
+let uthmaniWords: Record<string, { text: string }> | null = null;
+let segmentsByAyah: Record<string, any> | null = null;
+let surahAudio: Record<string, any> | null = null;
+
+let loadPromise: Promise<void> | null = null;
+
+export async function loadQuranData() {
+  if (loadPromise) return loadPromise;
+  loadPromise = (async () => {
+    const [qpcRes, uthRes, segRes, surahRes] = await Promise.all([
+      fetch("/text/qpc-v1-glyph-codes-wbw.json"),
+      fetch("/text/uthmani.json"),
+      fetch("/audio/segments.json"),
+      fetch("/audio/surah.json"),
+    ]);
+    qpcGlyphs = (await qpcRes.json()) as any;
+    uthmaniWords = (await uthRes.json()) as any;
+    segmentsByAyah = (await segRes.json()) as any;
+    surahAudio = (await surahRes.json()) as any;
+  })();
+  return loadPromise;
+}
+
+export function isQuranDataLoaded() {
+  return !!(qpcGlyphs && uthmaniWords && segmentsByAyah && surahAudio);
+}
 
 export type Word = {
   index: number; // 1-based within ayah
@@ -30,14 +54,16 @@ export type SurahAudioMeta = {
 };
 
 export function getSurahAudioMeta(surah: number): SurahAudioMeta | null {
-  const meta = (surahAudio as Record<string, SurahAudioMeta | undefined>)[
-    String(surah)
-  ];
-  return meta ?? null;
+  if (!surahAudio) return null;
+  const meta = (surahAudio as Record<string, SurahAudioMeta | undefined>)[String(surah)];
+  return meta || null;
 }
 
 // Group QPC + Uthmani words by ayah
 export function buildAyah(surah: number, ayah: number): Ayah {
+  if (!qpcGlyphs || !uthmaniWords) {
+    return { surah, ayah, words: [], uthmaniText: "" };
+  }
   const keyPrefix = `${surah}:${ayah}:`;
 
   const qpcEntries = Object.keys(qpcGlyphs as Record<string, { text: string }>)
@@ -76,10 +102,11 @@ export function buildAyah(surah: number, ayah: number): Ayah {
 }
 
 export function listAyahsInSurah(surah: number): number[] {
+  if (!segmentsByAyah && !qpcGlyphs) return [];
   // Infer ayah list from segments keys or text keys
   const prefix = `${surah}:`;
   const ayahSet = new Set<number>();
-  for (const key of Object.keys(segmentsByAyah as Record<string, unknown>)) {
+  for (const key of Object.keys((segmentsByAyah || {}) as Record<string, unknown>)) {
     if (key.startsWith(prefix)) {
       const [, ayStr] = key.split(":");
       ayahSet.add(Number(ayStr));
@@ -88,7 +115,7 @@ export function listAyahsInSurah(surah: number): number[] {
 
   if (ayahSet.size === 0) {
     // Fallback to text keys
-    for (const key of Object.keys(qpcGlyphs as Record<string, unknown>)) {
+    for (const key of Object.keys((qpcGlyphs || {}) as Record<string, unknown>)) {
       if (key.startsWith(prefix)) {
         const [, ayStr] = key.split(":");
         ayahSet.add(Number(ayStr));
@@ -103,6 +130,7 @@ export function getAyahSegments(
   surah: number,
   ayah: number,
 ): AyahSegments | null {
+  if (!segmentsByAyah) return null;
   const key = `${surah}:${ayah}`;
   const e = (segmentsByAyah as any)[key];
   if (!e) return null;

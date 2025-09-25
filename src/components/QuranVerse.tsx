@@ -18,10 +18,9 @@ function WordSpan({
   w,
   active,
   onClick,
-  useQpc,
-}: { w: Word; active: boolean; onClick: () => void; useQpc: boolean }) {
+}: { w: Word; active: boolean; onClick: () => void }) {
   const isNumber = /^[\u0660-\u0669]+$/.test(w.qpc);
-  const isQpc = useQpc && w.qpc !== w.uth; // fallback words use Uthmani or disabled QPC
+  const isQpc = w.qpc !== w.uth; // QPC glyphs available when differs from Uthmani
   return (
     <span
       dir="rtl"
@@ -33,7 +32,7 @@ function WordSpan({
       } ${isNumber ? "select-none cursor-default" : "hover:bg-secondary/60"}`}
       onClick={isNumber ? undefined : onClick}
     >
-      {w.qpc}
+      {isQpc ? w.qpc : w.uth}
     </span>
   );
 }
@@ -73,47 +72,60 @@ export default function QuranVerse(props: QuranVerseProps) {
   }, [segs]);
 
   return (
-    <div ref={ref} className="py-2">
-      <div className="rounded-xl border p-2 md:p-3">
-        <div className="grid grid-cols-[40px,1fr] md:grid-cols-[48px,1fr] gap-3 items-start">
-          <div className="flex flex-col items-start gap-2">
-            {isActive ? (
-              <Button size="icon" variant="secondary" onClick={onStop} title="Pause">
-                <Pause className="h-4 w-4" />
-              </Button>
-            ) : (
-              <Button size="icon" onClick={onPlay} title="Play">
-                <Play className="h-4 w-4" />
-              </Button>
-            )}
-            <Button
-              size="icon"
-              variant="outline"
-              onClick={() => navigator.clipboard.writeText(data.uthmaniText)}
-              title="Copy Uthmani text"
-            >
-              <CopyIcon className="h-4 w-4" />
+ <div ref={ref} className="py-2">
+    <div className="rounded-xl border p-2 md:p-3">
+      {/* Outer row: actions (left) + content (right) */}
+      <div className="flex gap-3">
+        {/* Actions + ayah number */}
+        <div className="flex flex-col items-start gap-2">
+          {isActive ? (
+            <Button size="icon" variant="secondary" onClick={onStop} title="Pause">
+              <Pause className="h-4 w-4" />
             </Button>
-            <ShareAyah data={data} />
+          ) : (
+            <Button size="icon" onClick={onPlay} title="Play">
+              <Play className="h-4 w-4" />
+            </Button>
+          )}
+          <Button
+            size="icon"
+            variant="outline"
+            onClick={() => navigator.clipboard.writeText(data.uthmaniText)}
+            title="Copy Uthmani text"
+          >
+            <CopyIcon className="h-4 w-4" />
+          </Button>
+          <ShareAyah data={data} trigger="icon" />
+
+          {/* Ayah number under actions */}
+          <div className="text-xs text-muted-foreground mt-2">{`${data.surah}:${data.ayah}`}</div>
+        </div>
+
+        {/* Ayah words + length */}
+        <div className="flex flex-col justify-between flex-1">
+          {/* Words */}
+          <div
+            dir="rtl"
+            lang="ar"
+            className="mt-1 flex flex-wrap gap-x-1 gap-y-2 justify-start"
+          >
+            {data.words.map((w) => (
+              <WordSpan
+                key={w.index}
+                w={w}
+                active={isActive && activeWordIndex === w.index}
+                onClick={() => handleWordClick(w)}
+              />
+            ))}
           </div>
 
-          <div className="relative">
-            <div className="text-xs text-muted-foreground mb-1">{`${data.surah}:${data.ayah}`}</div>
-            <div dir="rtl" lang="ar" className="mt-1 flex flex-wrap gap-x-1 gap-y-2">
-              {data.words.map((w) => (
-                <WordSpan
-                  key={w.index}
-                  w={w}
-                  active={isActive && activeWordIndex === w.index}
-                  onClick={() => handleWordClick(w)}
-                  useQpc={data.surah === 1}
-                />
-              ))}
-            </div>
-            <div className="absolute bottom-0 right-0 text-xs text-muted-foreground">{lengthLabel}</div>
+          {/* Length */}
+          <div className="mt-2 flex justify-end text-xs text-muted-foreground">
+            {lengthLabel}
           </div>
         </div>
       </div>
     </div>
+  </div> 
   );
 }

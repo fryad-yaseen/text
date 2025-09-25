@@ -1,12 +1,9 @@
 import { useEffect } from "react";
 
-// Eagerly import all woff2 files and expose their URLs
-const fontUrls = import.meta.glob("@/assets/text/QPC V1 Font.woff2/*.woff2", {
-  eager: true,
-  // Future-proof for Vite 6 API change noted during build
-  query: "?url",
-  import: "default",
-});
+// Public path where fonts are hosted after build
+const PUBLIC_FONT_DIR = "/text/QPC V1 Font.woff2";
+// Total number of font pages available (p1.woff2 ... p604.woff2)
+const FONT_PAGES = 604;
 
 function injectStyle(css: string) {
   const style = document.createElement("style");
@@ -20,11 +17,10 @@ export default function QPCFontLoader() {
     if (document.querySelector("style[data-qpc-fonts]")) return;
     const families: string[] = [];
     let css = "";
-    let counter = 0;
-    for (const url of Object.values(fontUrls)) {
-      counter += 1;
-      const family = `QPCV1_${counter}`;
+    for (let i = 1; i <= FONT_PAGES; i++) {
+      const family = `QPCV1_${i}`;
       families.push(`\"${family}\"`);
+      const url = `${PUBLIC_FONT_DIR}/p${i}.woff2`;
       css += `@font-face{font-family:${family};src:url(${url}) format('woff2');font-display:swap;}`;
     }
     css += `.font-qpc{font-family:${families.join(",")}, system-ui, sans-serif;}`;
